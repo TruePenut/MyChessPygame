@@ -6,6 +6,72 @@ cWhite = "#f7eaad"
 cRed = "#bf6790"
 cBlue = "#567696"
 
+# Move IDS
+# 0: Can't Capture, only move
+# 1: Can capture and move
+# 2: Can only move if capturing (Eg. Pawn capture)
+# 3: Can only be used on the first turn AND does not capture
+# 4: Move an extra tile after capturing
+# 5: Castling (Must include more data, new format [x displacement, y displacement, distance, ID, [Global Pos of second piece, its new position relative to the first piece]])
+
+# Format [x displacement, y displacement, distance, ID]
+
+bishopMoves = [[1, 1, 8, 1],[1, -1, 8, 1],[-1, -1, 8, 1],[-1, 1, 8, 1]]
+rookMoves = [[0, 1, 8, 1],[0, -1, 8, 1],[-1, 0, 8, 1],[1, 0, 8, 1]]
+knightMoves = [[2, 1, 1, 1],[2, -1, 1, 1],[-2, -1, 1, 1],[-2, 1, 1, 1],[1, 2, 1, 1],[1, -2, 1, 1],[-1, -2, 1, 1],[-1, 2, 1, 1]]
+kingMoves = [[1, 0, 1, 1], [1, 1, 1, 1], [0, 1, 1, 1], [-1, 1, 1, 1], [-1, 0, 1, 1], [-1, -1, 1, 1], [0, -1, 1, 1], [1, -1, 1, 1], [1, -1, 1, 1]]
+pawnMoves = [[0, -1, 1, 0], [-1, -1, 1, 2], [1, -1, 1, 2], [0, -1, 2, 3]]
+checkerMoves = [[1, 1, 2, 4],[1, -1, 2, 4],[-1, -1, 2, 4],[-1, 1, 2, 4],[0, 1, 1, 1],[0, -1, 1, 1],[-1, 0, 1, 1],[1, 0, 1, 1]]
+
+def quickGen(name, board):
+    # Classic Starting Board
+    if name == "c":
+        for x in range(8):
+            pawn = Piece("pawn", board, (x-1, 1), pawnMoves, False)
+            
+            pawn = Piece("pawn", board, (x-1, 6), pawnMoves, True)
+
+        brook1 = Piece("rook", board, (0, 0), rookMoves, False)
+        brook2 = Piece("rook", board, (7, 0), rookMoves, False)
+        knight = Piece("knight", board, (1, 0), knightMoves, False)
+        knight = Piece("knight", board, (6, 0), knightMoves, False)
+        bishop = Piece("bishop", board, (2, 0), bishopMoves, False)
+        bishop = Piece("bishop", board, (5, 0), bishopMoves, False)
+        queen = Piece("queen", board, (3,0), bishopMoves+rookMoves, False)
+        king = Piece("king", board, (4,0), kingMoves, False)
+
+        wrook1 = Piece("rook", board, (0, 7), rookMoves, True)
+        wrook2 = Piece("rook", board, (7, 7), rookMoves, True)
+        knight = Piece("knight", board, (1, 7), knightMoves, True)
+        knight = Piece("knight", board, (6, 7), knightMoves, True)
+        bishop = Piece("bishop", board, (2, 7), bishopMoves, True)
+        bishop = Piece("bishop", board, (5, 7), bishopMoves, True)
+        queen = Piece("queen", board, (3,7), bishopMoves+rookMoves, True)
+        king = Piece("king", board, (4,7), kingMoves, True)
+    elif name == "d":
+        for x in range(8):
+            pawn = Piece("pawn", board, (x-1, 1), pawnMoves, False)
+            
+            pawn = Piece("pawn", board, (x-1, 6), pawnMoves, True)
+
+        brook1 = Piece("rook", board, (0, 0), rookMoves, False)
+        brook2 = Piece("rook", board, (7, 0), rookMoves, False)
+        knight = Piece("knight", board, (1, 0), knightMoves, False)
+        knight = Piece("knight", board, (6, 0), knightMoves, False)
+        princess = Piece("princess", board, (2, 0), checkerMoves, False)
+        princess = Piece("princess", board, (5, 0), checkerMoves, False)
+        queen = Piece("queen", board, (3,0), bishopMoves+rookMoves, False)
+        king = Piece("king", board, (4,0), kingMoves, False)
+
+        wrook1 = Piece("rook", board, (0, 7), rookMoves, True)
+        wrook2 = Piece("rook", board, (7, 7), rookMoves, True)
+        knight = Piece("knight", board, (1, 7), knightMoves, True)
+        knight = Piece("knight", board, (6, 7), knightMoves, True)
+        princess = Piece("princess", board, (2, 7), checkerMoves, True)
+        princess = Piece("princess", board, (5, 7), checkerMoves, True)
+        queen = Piece("queen", board, (3,7), bishopMoves+rookMoves, True)
+        king = Piece("king", board, (4,7), kingMoves, True)
+
 class Piece:
     def __init__(self, pieceType, board, position, basicMoves, color): # Format [x displacement, y displacement, distance, capture] eg. Rook [[0,1,1,1],[1,0,1,1],[0,-1,1,1],[-1,0,1,1]]; Color is a bool
         self.cell = board.get_cell(position[0], position[1])
@@ -30,7 +96,7 @@ class Piece:
 
             for x in range(move[2]): #How many tiles should the movement go
                 if -1 < self.cell.x + move[0]*(x+1) < self.board.w and -1 < self.cell.y + move[1]*(x+1)*bOw < self.board.h:
-                    if move[3] != 3:
+                    if move[3] < 4:
                         if self.board.get_cell(self.cell.x + move[0]*(x+1), self.cell.y + move[1]*(x+1)*bOw).piece == None:  
                             self.listOfMoves.append([move[0]*(x+1), move[1]*(x+1)*bOw, move[3]])
 
@@ -38,13 +104,25 @@ class Piece:
                             self.listOfMoves.append([move[0]*(x+1), move[1]*(x+1)*bOw, move[3]])
                             print("Someones fat ass is in the way")
                             break
+                    elif move[3] == 4: # ID 4
+                        if self.board.get_cell(self.cell.x + move[0]*(x+1), self.cell.y + move[1]*(x+1)*bOw).piece == None:  
+                            #self.listOfMoves.append([move[0]*(x+1), move[1]*(x+1)*bOw, 0])
+                            print("Too far")
+                        else: #When a piece is detected
+                            if -1 < self.cell.x + move[0]*(x+2) < self.board.w and -1 < self.cell.y + move[1]*(x+2)*bOw < self.board.h:
+                                self.listOfMoves.append([move[0]*(x+2), move[1]*(x+2)*bOw, move[3], move[0]*(x+1), move[1]*(x+1)*bOw])
+                                if self.board.get_cell(self.cell.x + move[0]*(x+1), self.cell.y + move[1]*(x+1)*bOw).piece.color != self.color: #If piece on this moves tile is on the opposit color
+                                    self.board.get_cell(self.cell.x + move[0]*(x+2), self.cell.y + move[1]*(x+2)*bOw).NBT = ["killMyPiece", self.cell.x + move[0]*(x+1), self.cell.y + move[1]*(x+1)*bOw]
+                                    print("Someones fat ass is in the way")
+                                break
                     else:
                         if self.moveCounter < 1 and (self.board.get_cell(self.cell.x + move[0]*(x+1), self.cell.y + move[1]*(x+1)*bOw).piece == None):
                             self.listOfMoves.append([move[0]*(x+1), move[1]*bOw*(x+1), 0])
                         else:
                             print("Someones fat ass is in the way")
                             break
-                    
+                
+                
                 else:
                     print("Out of domain")
                     break
@@ -59,9 +137,16 @@ class Piece:
     def colorInMoves(self):
         for move in self.listOfMoves:
             print(move)
-            if self.board.get_cell(self.cell.x + move[0], self.cell.y + move[1]).piece == None and move[2] != 2:
+            if self.board.get_cell(self.cell.x + move[0], self.cell.y + move[1]).piece == None and move[2] != 2 and move[2] != 4:
                 self.board.get_cell(self.cell.x + move[0], self.cell.y + move[1]).color = cBlue
                 self.board.get_cell(self.cell.x + move[0], self.cell.y + move[1]).validMove = True
+            
+            elif move[2] == 4:
+                if self.board.get_cell(self.cell.x + move[0], self.cell.y + move[1]).piece == None:
+                    self.board.get_cell(self.cell.x + move[0], self.cell.y + move[1]).color = cBlue
+                    self.board.get_cell(self.cell.x + move[0], self.cell.y + move[1]).validMove = True
+                    if self.board.get_cell(self.cell.x + move[3], self.cell.y + move[4]).piece.color != self.color:
+                        self.board.get_cell(self.cell.x + move[3], self.cell.y + move[4]).color = cRed
                 
             elif self.board.get_cell(self.cell.x + move[0], self.cell.y + move[1]).piece == None and move[2] == 2:
                 self.board.get_cell(self.cell.x + move[0], self.cell.y + move[1]).color = self.board.get_cell(self.cell.x + move[0], self.cell.y + move[1]).primaryColor
@@ -94,6 +179,7 @@ class Cell: #Class to hold basic info about the board (color, piece id, pos). Ea
         self.color = "#000000"
         self.piece = piece
         self.validMove = False
+        self.NBT = None
         
         if (x + y)%2:
             self.primaryColor = cGreen
@@ -189,6 +275,4 @@ class Display:  # Displays the game
 
     def quit(self):
         py.quit()
-
-
         
