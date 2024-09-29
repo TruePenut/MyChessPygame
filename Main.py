@@ -1,6 +1,9 @@
 from ChessPLib import *
 from math import *
 
+debugRotation=0
+bnw = 0
+
 inputSize = input("What size board do you want? (s or y/x): ") #Get size of the board from player
 
 if str(inputSize) == "s":
@@ -10,50 +13,29 @@ else:
     height, width = map(int, inputSize.split("/"))
     board = Table(height, width)
 
-screen = Display(board, 64, cWhite, cGreen)
-    
+screen = Display(board, 64, cWhite, cGreen)   
 board.print()
 
 lastCell = None
 
-# Move IDS
-# 0: Can't Capture, only move
-# 1: Can capture and move
-# 2: Can only move if capturing (Eg. Pawn capture)
-# 3: Can only be used on the first turn AND does not capture
-# 4: Castling 1
-# 5: Castling 2
+debugDictionairy = {
+    0 : "rook",
+    1 : "knight",
+    2 : "bishop",
+    3 : "queen",
+    4 : "checker",
+    5 : None,
+    6 : "pawn",
+    "rook" : rookMoves,
+    "knight" : knightMoves,
+    "bishop" : bishopMoves,
+    "queen" : rookMoves + bishopMoves,
+    "checker" : checkerMoves,
+    "pawn" : pawnMoves,
+    "blank" : "I have a skill issue"
+}
 
-bishopMoves = [[1, 1, 8, 1],[1, -1, 8, 1],[-1, -1, 8, 1],[-1, 1, 8, 1]]
-rookMoves = [[0, 1, 8, 1],[0, -1, 8, 1],[-1, 0, 8, 1],[1, 0, 8, 1]]
-knightMoves = [[2, 1, 1, 1],[2, -1, 1, 1],[-2, -1, 1, 1],[-2, 1, 1, 1],[1, 2, 1, 1],[1, -2, 1, 1],[-1, -2, 1, 1],[-1, 2, 1, 1]]
-kingMoves = [[1, 0, 1, 1], [1, 1, 1, 1], [0, 1, 1, 1], [-1, 1, 1, 1], [-1, 0, 1, 1], [-1, -1, 1, 1], [0, -1, 1, 1], [1, -1, 1, 1]]
-pawnMoves = [[0, -1, 1, 0], [-1, -1, 1, 2], [1, -1, 1, 2], [0, -1, 2, 3]]
-
-#Starting Board
-
-for x in range(8):
-    pawn = Piece("pawn", board, (x-1, 1), pawnMoves, False)
-    
-    pawn = Piece("pawn", board, (x-1, 6), pawnMoves, True)
-
-brook1 = Piece("rook", board, (0, 0), rookMoves, False)
-brook2 = Piece("rook", board, (7, 0), rookMoves, False)
-knight = Piece("knight", board, (1, 0), knightMoves, False)
-knight = Piece("knight", board, (6, 0), knightMoves, False)
-bishop = Piece("bishop", board, (2, 0), bishopMoves, False)
-bishop = Piece("bishop", board, (5, 0), bishopMoves, False)
-queen = Piece("queen", board, (3,0), bishopMoves+rookMoves, False)
-king = Piece("king", board, (4,0), kingMoves, False)
-
-wrook1 = Piece("rook", board, (0, 7), rookMoves, True)
-wrook2 = Piece("rook", board, (7, 7), rookMoves, True)
-knight = Piece("knight", board, (1, 7), knightMoves, True)
-knight = Piece("knight", board, (6, 7), knightMoves, True)
-bishop = Piece("bishop", board, (2, 7), bishopMoves, True)
-bishop = Piece("bishop", board, (5, 7), bishopMoves, True)
-queen = Piece("queen", board, (3,7), bishopMoves+rookMoves, True)
-king = Piece("king", board, (4,7), kingMoves, True)
+quickGen("d", board)
 
 turn = True
 
@@ -68,12 +50,17 @@ while running:
         if event.type == py.QUIT:
             running = False
         
-        if event.type == py.MOUSEBUTTONDOWN:
+        if event.type == py.MOUSEBUTTONDOWN and event.button == 1: #Left Click
             if currentCell.validMove == True:
                 lastCell.piece.move(currentCell)
                 currentCell.piece = lastCell.piece
                 lastCell.piece = None
                 print("I moved!")
+                
+                if currentCell.NBT != None:
+                    if currentCell.NBT[0] == "killMyPiece":
+                        board.get_cell(currentCell.NBT[1], currentCell.NBT[2]).piece = None
+                        currentCell.NBT = None
                 
                 if turn:
                     turn = False
@@ -88,6 +75,19 @@ while running:
                 currentCell.piece.genMoves()
                 currentCell.piece.colorInMoves()
                 lastCell = currentCell
+                
+        if event.type == py.MOUSEBUTTONDOWN and event.button == 3: #Right Click
+            print(debugRotation)
+            print(debugRotation%(len(debugDictionairy)/2))
+            if debugDictionairy[debugRotation%(len(debugDictionairy)/2)] != None:
+                currentCell.piece = Piece(debugDictionairy[debugRotation%(len(debugDictionairy)/2)], board, (currentCell.x, currentCell.y), debugDictionairy[debugDictionairy[debugRotation%(len(debugDictionairy)/2)]], True if bnw%2 == 0 else False)
+            else:
+                currentCell.piece = None
+            if bnw%2 == 0:
+                debugRotation += 1 
+            bnw += 1
+            if debugRotation == 11:
+                debugRotation = 0
     
     clickedThisFrame = False
     screen.run(board)
