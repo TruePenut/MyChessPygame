@@ -19,12 +19,12 @@ board.print()
 lastCell = None
 
 debugDictionairy = {
-    0 : "rook",
+    0 : None,
     1 : "knight",
     2 : "bishop",
     3 : "queen",
     4 : "checker",
-    5 : None,
+    5 : "rook",
     6 : "pawn",
     "rook" : rookMoves,
     "knight" : knightMoves,
@@ -38,8 +38,13 @@ debugDictionairy = {
 quickGen("d", board)
 
 turn = True
-
 running = True
+
+py.display.set_caption('Goofy Chess')
+py.display.set_icon(py.image.load("Assets/blackpawn.png"))
+
+notation = []
+
 while running:         
     mouseCellx = floor(py.mouse.get_pos()[0]/screen.square_size) if floor(py.mouse.get_pos()[0]/screen.square_size) < (board.w-1) else board.w-1
     mouseCelly = floor(py.mouse.get_pos()[1]/screen.square_size) if floor(py.mouse.get_pos()[1]/screen.square_size) < (board.h-1) else board.h-1 # Finds which cell the mouse is in
@@ -53,14 +58,22 @@ while running:
         if event.type == py.MOUSEBUTTONDOWN and event.button == 1: #Left Click
             if currentCell.validMove == True:
                 lastCell.piece.move(currentCell)
+                print(genChessNotation(lastCell.piece.pieceType, currentCell, False if currentCell.piece == None else True, board))
+                notation.append(genChessNotation(lastCell.piece.pieceType, currentCell, False if currentCell.piece == None else True, board))
+                print(notation)
                 currentCell.piece = lastCell.piece
                 lastCell.piece = None
                 print("I moved!")
                 
-                if currentCell.NBT != None:
-                    if currentCell.NBT[0] == "killMyPiece":
+                if currentCell.NBT != None: #NBT Data Actions
+                    if currentCell.NBT[0] == "killMyPiece": #Kill piece action
                         board.get_cell(currentCell.NBT[1], currentCell.NBT[2]).piece = None
-                        currentCell.NBT = None
+
+                    if currentCell.NBT[0] == "Swapsies":
+                        board.get_cell(currentCell.NBT[1], currentCell.NBT[2]).piece.cell = board.get_cell(currentCell.NBT[3], currentCell.NBT[4])
+                        board.get_cell(currentCell.NBT[3], currentCell.NBT[4]).piece = board.get_cell(currentCell.NBT[1], currentCell.NBT[2]).piece
+                        board.get_cell(currentCell.NBT[1], currentCell.NBT[2]).piece = None
+                    currentCell.NBT = None
                 
                 if turn:
                     turn = False
@@ -92,7 +105,6 @@ while running:
     clickedThisFrame = False
     screen.run(board)
     
-    
+print[notation]
 
-    
 screen.quit()
