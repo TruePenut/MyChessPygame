@@ -14,7 +14,6 @@ cBlue = "#567696"
 # 4: Move an extra tile after capturing
 # 5: Castling (Must include more data, new format [x displacement, y displacement, distance, ID, [Global Pos of second piece, its new position relative to the first piece]])
 
-
 # Format [x displacement, y displacement, distance, ID]
 
 bishopMoves = [[1, 1, 8, 1],[1, -1, 8, 1],[-1, -1, 8, 1],[-1, 1, 8, 1]]
@@ -92,7 +91,7 @@ def quickGen(name, board):#Premade boards with set moves and pieces
         king = Piece("king", board, (4,7), kingMoves, True)
 
 class Piece: #Holds all the piece logic
-    def __init__(self, pieceType, board, position, basicMoves, color): # Format [x displacement, y displacement, distance, capture] eg. Rook [[0,1,1,1],[1,0,1,1],[0,-1,1,1],[-1,0,1,1]]; Color is a bool
+    def __init__(self, pieceType, board, position, basicMoves, color): # Format [x displacement, y displacement, distance, ID] eg. Rook [[0,1,1,1],[1,0,1,1],[0,-1,1,1],[-1,0,1,1]]; Color is a bool
         self.cell = board.get_cell(position[0], position[1])
         self.basicMoves = basicMoves
         self.board = board
