@@ -24,7 +24,7 @@ knightMoves = [[2, 1, 1, 1],[2, -1, 1, 1],[-2, -1, 1, 1],[-2, 1, 1, 1],[1, 2, 1,
 kingMoves = [[1, 0, 1, 1], [1, 1, 1, 1], [0, 1, 1, 1], [-1, 1, 1, 1], [-1, 0, 1, 1], [-1, -1, 1, 1], [0, -1, 1, 1], [1, -1, 1, 1], [1, -1, 1, 1], [-2, 0, 1, 5, [[-4, 0], [-1, 0]]], [2, 0, 1, 5, [[3, 0], [1, 0]]]]
 pawnMoves = [[0, -1, 1, 0], [-1, -1, 1, 2], [1, -1, 1, 2], [0, -1, 2, 3]]
 checkerMoves = [[1, 1, 2, 4],[1, -1, 2, 4],[-1, -1, 2, 4],[-1, 1, 2, 4],[0, 1, 1, 1],[0, -1, 1, 1],[-1, 0, 1, 1],[1, 0, 1, 1]]
-pawn2Moves = [[0, 1, 1, 2], [0, -1, 1, 1], [1, -2, 1, 3], [-1, -2, 1, 3]]
+pawn2Moves = [[1, -1, 1, 0],[-1, -1, 1, 0],[0, 1, 1, 2],[0, -1, 1, 2],[1, -2, 1, 3],[-1, -2, 1, 3]]
 
 notationDict = {
     "rook" : "R",
@@ -92,6 +92,18 @@ def quickGen(name, board):#Premade boards with set moves and pieces
         queen = Piece("queen", board, (3,7), bishopMoves+rookMoves, True)
         king = Piece("king", board, (4,7), kingMoves, True)
 
+class Signal:
+    def __init__(self):
+        self._subscribers = []
+
+    def connect(self, callback):
+        self._subscribers.append(callback)
+
+    def emit(self, *args, **kwargs):
+        for subscriber in self._subscribers:
+            subscriber(*args, **kwargs)
+
+
 class Piece: #Holds all the piece logic
     def __init__(self, pieceType, board, position, basicMoves, color): # Format [x displacement, y displacement, distance, ID] eg. Rook [[0,1,1,1],[1,0,1,1],[0,-1,1,1],[-1,0,1,1]]; Color is a bool
         #Initialised along with the pieces
@@ -117,10 +129,9 @@ class Piece: #Holds all the piece logic
     def genMoves(self): #Generate all the valid moves
         self.listOfMoves = []
         bOw = 1 if self.color else -1
-        for move in self.basicMoves:
-
+        for move in self.basicMoves: 
             for x in range(move[2]): #How many tiles should the movement go
-                if -1 < self.cell.x + move[0]*(x+1) < self.board.w and -1 < self.cell.y + move[1]*(x+1)*bOw < self.board.h:
+                if -1 < self.cell.x + move[0]*(x+1) < self.board.w and -1 < self.cell.y + move[1]*(x+1)*bOw < self.board.h: #Check if it is domain
                     theCellIAmMovingTo = self.board.get_cell(self.cell.x + move[0]*(x+1), self.cell.y + move[1]*(x+1)*bOw) #This is the cell this move will direct the piece towards
                     if move[3] < 3: #IDs 0, 1, and 2
                         if theCellIAmMovingTo.piece == None:  
@@ -130,7 +141,7 @@ class Piece: #Holds all the piece logic
                             print("Someones fat ass is in the way")
                             break
 
-                    elif move[3] == 3: #ID 3
+                    elif move[3] == 3: #ID 3 first turn
                         if self.moveCounter < 1 and (theCellIAmMovingTo.piece == None):
                             self.listOfMoves.append([move[0]*(x+1), move[1]*bOw*(x+1), 0])
                         else:
@@ -148,10 +159,11 @@ class Piece: #Holds all the piece logic
                             print("Too far")
                             
                     elif move[3] == 5: #ID 5: Castling [x, y, distance, ID, [[Rel x, Rel y of the pieces], [New rel x and rel y]]]
-                        if self.moveCounter == 0 and self.board.get_cell(self.cell.x + move[4][0][0], self.cell.y + move[4][0][1]).piece.moveCounter == 0: #If I and the piece I am moving are on the first move
-                            if theCellIAmMovingTo.piece == None and self.board.get_cell(self.cell.x + move[4][1][0], self.cell.y + move[4][1][1]).piece == None:
-                                self.listOfMoves.append([move[0]*(x+1), move[1]*bOw*(x+1), 0])
-                                theCellIAmMovingTo.NBT = ["Swapsies", self.cell.x + move[4][0][0], self.cell.y + move[4][0][1], self.cell.x + move[4][1][0], self.cell.y + move[4][1][1]]
+                        if self.board.get_cell(self.cell.x + move[4][0][0], self.cell.y + move[4][0][1]).piece.moveCounter == 0: #If I and the piece I am moving are on the first move
+                            if self.moveCounter == 0 and self.board.get_cell(self.cell.x + move[4][0][0], self.cell.y + move[4][0][1]).piece.moveCounter == 0: #If I and the piece I am moving are on the first move
+                                if theCellIAmMovingTo.piece == None and self.board.get_cell(self.cell.x + move[4][1][0], self.cell.y + move[4][1][1]).piece == None:
+                                    self.listOfMoves.append([move[0]*(x+1), move[1]*bOw*(x+1), 0])
+                                    theCellIAmMovingTo.NBT = ["Swapsies", self.cell.x + move[4][0][0], self.cell.y + move[4][0][1], self.cell.x + move[4][1][0], self.cell.y + move[4][1][1]]
                 else:
                     print("Out of domain")
                     break
@@ -203,7 +215,10 @@ class Piece: #Holds all the piece logic
         if self.pieceType == "pawn" and self.color == True and self.cell.y == 0:
             self.transition()           
 
+
+
 class Cell: #Class to hold basic info about the board (color, piece id, pos). Each cell is just a square on the board
+    signal = Signal()
     def __init__(self, x, y, piece):
         self.x = x
         self.y = y
@@ -219,6 +234,8 @@ class Cell: #Class to hold basic info about the board (color, piece id, pos). Ea
         else:
             self.primaryColor = cWhite
             self.color = cWhite
+
+        Cell.signal.connect(self.reset_NBT)
             
     def changeColor(self, color):
         self.color = color
@@ -227,9 +244,16 @@ class Cell: #Class to hold basic info about the board (color, piece id, pos). Ea
         self.color = self.primaryColor
         self.validMove = False
         
-    
     def get_position(self):
         return self.x, self.y
+    
+    def reset_NBT(self):
+        self.NBT = None    
+    
+    @staticmethod
+    def reset_all_NBT():
+        # Emit the signal to reset NBT for all subscribed Cell objects
+        Cell.signal.emit()
 
 class Table: #Class of the data part of the game, hold all the positions
     def __init__(self, height, width):

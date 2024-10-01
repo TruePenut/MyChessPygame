@@ -80,6 +80,8 @@ while running:
 
                     currentCell.NBT = None # Remove the NBT after its used
                 
+                Cell.reset_all_NBT()
+
                 if turn:
                     turn = False
                 else:
@@ -110,6 +112,6 @@ while running:
     clickedThisFrame = False
     screen.run(board)
     
-print[notation]
+print(notation)
 
 screen.quit()
