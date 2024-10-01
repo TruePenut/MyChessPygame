@@ -61,7 +61,10 @@ while running:
                 print(genChessNotation(lastCell.piece.pieceType, currentCell, False if currentCell.piece == None else True, board))
 
                 # Notation Generation
-                notation.append(genChessNotation(lastCell.piece.pieceType, currentCell, False if currentCell.piece == None else True, board))
+                if currentCell.NBT != None and currentCell.NBT[0] == "Swapsies":
+                    notation.append("O-O-O")
+                else:
+                    notation.append(genChessNotation(lastCell.piece.pieceType, currentCell, False if currentCell.piece == None else True, board))
                 print(notation)
 
                 # Moves the piece
