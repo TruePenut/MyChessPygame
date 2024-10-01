@@ -1,5 +1,7 @@
 import pygame as py
 
+# TEST
+
 # Color Palletes:
 cGreen = "#005c32"
 cWhite = "#f7eaad"
@@ -92,64 +94,69 @@ def quickGen(name, board):#Premade boards with set moves and pieces
 
 class Piece: #Holds all the piece logic
     def __init__(self, pieceType, board, position, basicMoves, color): # Format [x displacement, y displacement, distance, ID] eg. Rook [[0,1,1,1],[1,0,1,1],[0,-1,1,1],[-1,0,1,1]]; Color is a bool
+        #Initialised along with the pieces
         self.cell = board.get_cell(position[0], position[1])
         self.basicMoves = basicMoves
         self.board = board
-        self.listOfMoves = []
         self.color = color
         self.pieceType = pieceType
         self.moveCounter = 0
 
+        #Variables that shift over time
         self.lastPosition = None
+        self.listOfMoves = []
         
+        #Sprites
         self.sprite_name = f"{'white' if self.color else 'black'}{self.pieceType}.png"
         self.sprite = py.image.load("Assets/"+self.sprite_name)
         
         print(f"{self.sprite_name} Initialised")
         
-        self.cell.piece = self
+        self.cell.piece = self #Assigns a cell this piece
                 
-    def genMoves(self):
+    def genMoves(self): #Generate all the valid moves
         self.listOfMoves = []
         bOw = 1 if self.color else -1
         for move in self.basicMoves:
 
             for x in range(move[2]): #How many tiles should the movement go
                 if -1 < self.cell.x + move[0]*(x+1) < self.board.w and -1 < self.cell.y + move[1]*(x+1)*bOw < self.board.h:
-                    if move[3] < 3: #IDs 0, 1 and 2
-                        if self.board.get_cell(self.cell.x + move[0]*(x+1), self.cell.y + move[1]*(x+1)*bOw).piece == None:  
+                    theCellIAmMovingTo = self.board.get_cell(self.cell.x + move[0]*(x+1), self.cell.y + move[1]*(x+1)*bOw) #This is the cell this move will direct the piece towards
+                    if move[3] < 3: #IDs 0, 1, and 2
+                        if theCellIAmMovingTo.piece == None:  
                             self.listOfMoves.append([move[0]*(x+1), move[1]*(x+1)*bOw, move[3]])
                         else:
                             self.listOfMoves.append([move[0]*(x+1), move[1]*(x+1)*bOw, move[3]])
                             print("Someones fat ass is in the way")
                             break
-                    elif move[3] == 4: # ID 4
-                        if self.board.get_cell(self.cell.x + move[0]*(x+1), self.cell.y + move[1]*(x+1)*bOw).piece == None:  
-                            #self.listOfMoves.append([move[0]*(x+1), move[1]*(x+1)*bOw, 0])
-                            print("Too far")
-                        else: #When a piece is detected
-                            if -1 < self.cell.x + move[0]*(x+2) < self.board.w and -1 < self.cell.y + move[1]*(x+2)*bOw < self.board.h:
-                                self.listOfMoves.append([move[0]*(x+2), move[1]*(x+2)*bOw, move[3], move[0]*(x+1), move[1]*(x+1)*bOw])
-                                if self.board.get_cell(self.cell.x + move[0]*(x+1), self.cell.y + move[1]*(x+1)*bOw).piece.color != self.color: #If piece on this moves tile is on the opposit color
-                                    self.board.get_cell(self.cell.x + move[0]*(x+2), self.cell.y + move[1]*(x+2)*bOw).NBT = ["killMyPiece", self.cell.x + move[0]*(x+1), self.cell.y + move[1]*(x+1)*bOw]
-                                    print("Someones fat ass is in the way")
-                                break
+
                     elif move[3] == 3: #ID 3
-                        if self.moveCounter < 1 and (self.board.get_cell(self.cell.x + move[0]*(x+1), self.cell.y + move[1]*(x+1)*bOw).piece == None):
+                        if self.moveCounter < 1 and (theCellIAmMovingTo.piece == None):
                             self.listOfMoves.append([move[0]*(x+1), move[1]*bOw*(x+1), 0])
                         else:
                             print("Someones fat ass is in the way")
                             break
+
+                    elif move[3] == 4: # ID 4, the checkers piece uses this
+                        if theCellIAmMovingTo.piece != None: # If there is a piece on the cell I am moving to
+                            if -1 < self.cell.x + move[0]*(x+2) < self.board.w and -1 < self.cell.y + move[1]*(x+2)*bOw < self.board.h: # Doing a second check the the move is in domain
+                                self.listOfMoves.append([move[0]*(x+2), move[1]*(x+2)*bOw, move[3], move[0]*(x+1), move[1]*(x+1)*bOw]) #If so, add this move and the kill move as a valid move
+                                if theCellIAmMovingTo.piece.color != self.color: #If piece on this moves tile is on the opposite color, add an NBT to the cell to KILL this piece
+                                    self.board.get_cell(self.cell.x + move[0]*(x+2), self.cell.y + move[1]*(x+2)*bOw).NBT = ["killMyPiece", self.cell.x + move[0]*(x+1), self.cell.y + move[1]*(x+1)*bOw]
+                                    print("Someones fat ass is in the way")
+                                break
+                            print("Too far")
+                            
                     elif move[3] == 5: #ID 5: Castling [x, y, distance, ID, [[Rel x, Rel y of the pieces], [New rel x and rel y]]]
-                        if self.moveCounter == 0 and self.board.get_cell(self.cell.x + move[4][0][0], self.cell.y + move[4][0][1]).piece.moveCounter == 0:
-                            if self.board.get_cell(self.cell.x + move[0]*(x+1), self.cell.y + move[1]*(x+1)*bOw).piece == None and self.board.get_cell(self.cell.x + move[4][1][0], self.cell.y + move[4][1][1]).piece == None:
+                        if self.moveCounter == 0 and self.board.get_cell(self.cell.x + move[4][0][0], self.cell.y + move[4][0][1]).piece.moveCounter == 0: #If I and the piece I am moving are on the first move
+                            if theCellIAmMovingTo.piece == None and self.board.get_cell(self.cell.x + move[4][1][0], self.cell.y + move[4][1][1]).piece == None:
                                 self.listOfMoves.append([move[0]*(x+1), move[1]*bOw*(x+1), 0])
-                                self.board.get_cell(self.cell.x + move[0]*(x+1), self.cell.y + move[1]*(x+1)*bOw).NBT = ["Swapsies", self.cell.x + move[4][0][0], self.cell.y + move[4][0][1], self.cell.x + move[4][1][0], self.cell.y + move[4][1][1]]
+                                theCellIAmMovingTo.NBT = ["Swapsies", self.cell.x + move[4][0][0], self.cell.y + move[4][0][1], self.cell.x + move[4][1][0], self.cell.y + move[4][1][1]]
                 else:
                     print("Out of domain")
                     break
     
-    def transition(self):
+    def transition(self): #Promotion, will add a selection screen soon. Should probably add a thing for initialisation
         self.pieceType = "queen"
         self.basicMoves = [[1, 1, 8, 1],[1, -1, 8, 1],[-1, -1, 8, 1],[-1, 1, 8, 1], [0, 1, 8, 1],[0, -1, 8, 1],[-1, 0, 8, 1],[1, 0, 8, 1]]
         self.sprite_name = f"{'white' if self.color else 'black'}{self.pieceType}.png"
@@ -159,7 +166,7 @@ class Piece: #Holds all the piece logic
     def colorInMoves(self):
         for move in self.listOfMoves:
             
-            if self.board.get_cell(self.cell.x + move[0], self.cell.y + move[1]).piece == None and move[2] != 2 and move[2] != 4:
+            if self.board.get_cell(self.cell.x + move[0], self.cell.y + move[1]).piece == None and (move[2] == 0 or move[2] == 1 or move[2] == 3 or move[2] == 5):
                 print(f"{move} No Kill Move")
                 self.board.get_cell(self.cell.x + move[0], self.cell.y + move[1]).color = cBlue
                 self.board.get_cell(self.cell.x + move[0], self.cell.y + move[1]).validMove = True

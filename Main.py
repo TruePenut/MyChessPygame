@@ -56,11 +56,15 @@ while running:
             running = False
         
         if event.type == py.MOUSEBUTTONDOWN and event.button == 1: #Left Click
-            if currentCell.validMove == True:
+            if currentCell.validMove == True: #Uses the painted tiles as the valid moves, each cell has an attribute called "Valid Move"
                 lastCell.piece.move(currentCell)
                 print(genChessNotation(lastCell.piece.pieceType, currentCell, False if currentCell.piece == None else True, board))
+
+                # Notation Generation
                 notation.append(genChessNotation(lastCell.piece.pieceType, currentCell, False if currentCell.piece == None else True, board))
                 print(notation)
+
+                # Moves the piece
                 currentCell.piece = lastCell.piece
                 lastCell.piece = None
                 print("I moved!")
@@ -69,11 +73,12 @@ while running:
                     if currentCell.NBT[0] == "killMyPiece": #Kill piece action
                         board.get_cell(currentCell.NBT[1], currentCell.NBT[2]).piece = None
 
-                    if currentCell.NBT[0] == "Swapsies":
+                    if currentCell.NBT[0] == "Swapsies": #Move a piece somewhere else
                         board.get_cell(currentCell.NBT[1], currentCell.NBT[2]).piece.cell = board.get_cell(currentCell.NBT[3], currentCell.NBT[4])
                         board.get_cell(currentCell.NBT[3], currentCell.NBT[4]).piece = board.get_cell(currentCell.NBT[1], currentCell.NBT[2]).piece
                         board.get_cell(currentCell.NBT[1], currentCell.NBT[2]).piece = None
-                    currentCell.NBT = None
+
+                    currentCell.NBT = None # Remove the NBT after its used
                 
                 if turn:
                     turn = False
