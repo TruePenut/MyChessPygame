@@ -44,53 +44,54 @@ def genChessNotation(name, cell, killed, board):
         return f"{notationDict[name]}{chr(65 + cell.x).lower()}{str(board.h - cell.y)}"
     
 def quickGen(name, board):#Premade boards with set moves and pieces
+    print(board)
     # Classic Starting Board
     if name == "s":
-        for x in range(8):
+        for x in range(board.w):
             pawn = Piece("pawn", board, (x-1, 1), pawnMoves, False)
             
-            pawn = Piece("pawn", board, (x-1, 6), pawnMoves, True)
+            pawn = Piece("pawn", board, (x-1, board.h-2), pawnMoves, True)
 
         brook1 = Piece("rook", board, (0, 0), rookMoves, False)
-        brook2 = Piece("rook", board, (7, 0), rookMoves, False)
-        knight = Piece("knight", board, (1, 0), knightMoves, False)
-        knight = Piece("knight", board, (6, 0), knightMoves, False)
-        bishop = Piece("bishop", board, (2, 0), bishopMoves, False)
-        bishop = Piece("bishop", board, (5, 0), bishopMoves, False)
-        queen = Piece("queen", board, (3,0), bishopMoves+rookMoves, False)
-        king = Piece("king", board, (4,0), kingMoves, False)
+        brook2 = Piece("rook", board, (board.w-1, 0), rookMoves, False)
+        knight = Piece("knight", board, (board.w-7, 0), knightMoves, False)
+        knight = Piece("knight", board, (board.w-2, 0), knightMoves, False)
+        bishop = Piece("bishop", board, (board.w-6, 0), bishopMoves, False)
+        bishop = Piece("bishop", board, (board.w-3, 0), bishopMoves, False)
+        queen = Piece("queen", board, (board.w-5,0), bishopMoves+rookMoves, False)
+        king = Piece("king", board, (board.w-4,0), kingMoves, False)
 
         wrook1 = Piece("rook", board, (0, 7), rookMoves, True)
-        wrook2 = Piece("rook", board, (7, 7), rookMoves, True)
-        knight = Piece("knight", board, (1, 7), knightMoves, True)
-        knight = Piece("knight", board, (6, 7), knightMoves, True)
-        bishop = Piece("bishop", board, (2, 7), bishopMoves, True)
-        bishop = Piece("bishop", board, (5, 7), bishopMoves, True)
-        queen = Piece("queen", board, (3,7), bishopMoves+rookMoves, True)
-        king = Piece("king", board, (4,7), kingMoves, True)
+        wrook2 = Piece("rook", board, (board.w-1, board.h-1), rookMoves, True)
+        knight = Piece("knight", board, (board.w-7, board.h-1), knightMoves, True)
+        knight = Piece("knight", board, (board.w-2, board.h-1), knightMoves, True)
+        bishop = Piece("bishop", board, (board.w-6, board.h-1), bishopMoves, True)
+        bishop = Piece("bishop", board, (board.w-3, board.h-1), bishopMoves, True)
+        queen = Piece("queen", board, (board.w-5,board.h-1), bishopMoves+rookMoves, True)
+        king = Piece("king", board, (board.w-4,board.h-1), kingMoves, True)
     elif name == "d":
-        for x in range(8):
+        for x in range(board.w):
             pawn = Piece("pawn", board, (x-1, 1), pawn2Moves, False)
             
-            pawn = Piece("pawn", board, (x-1, 6), pawn2Moves, True)
+            pawn = Piece("pawn", board, (x-1, board.h-2), pawn2Moves, True)
 
         brook1 = Piece("rook", board, (0, 0), rookMoves, False)
-        brook2 = Piece("rook", board, (7, 0), rookMoves, False)
-        knight = Piece("knight", board, (1, 0), knightMoves, False)
-        knight = Piece("knight", board, (6, 0), knightMoves, False)
-        princess = Piece("checker", board, (2, 0), checkerMoves, False)
-        princess = Piece("checker", board, (5, 0), checkerMoves, False)
-        queen = Piece("queen", board, (3,0), bishopMoves+rookMoves, False)
-        king = Piece("king", board, (4,0), kingMoves, False)
+        brook2 = Piece("rook", board, (board.w-1, 0), rookMoves, False)
+        knight = Piece("knight", board, (board.w-7, 0), knightMoves, False)
+        knight = Piece("knight", board, (board.w-2, 0), knightMoves, False)
+        princess = Piece("checker", board, (board.w-6, 0), checkerMoves, False)
+        princess = Piece("checker", board, (board.w-3, 0), checkerMoves, False)
+        queen = Piece("queen", board, (board.w-5,0), bishopMoves+rookMoves, False)
+        king = Piece("king", board, (board.w-4,0), kingMoves, False)
 
-        wrook1 = Piece("rook", board, (0, 7), rookMoves, True)
-        wrook2 = Piece("rook", board, (7, 7), rookMoves, True)
-        knight = Piece("knight", board, (1, 7), knightMoves, True)
-        knight = Piece("knight", board, (6, 7), knightMoves, True)
-        princess = Piece("checker", board, (2, 7), checkerMoves, True)
-        princess = Piece("checker", board, (5, 7), checkerMoves, True)
-        queen = Piece("queen", board, (3,7), bishopMoves+rookMoves, True)
-        king = Piece("king", board, (4,7), kingMoves, True)
+        wrook1 = Piece("rook", board, (0, board.h-1), rookMoves, True)
+        wrook2 = Piece("rook", board, (board.w-1, board.h-1), rookMoves, True)
+        knight = Piece("knight", board, (board.w-7, board.h-1), knightMoves, True)
+        knight = Piece("knight", board, (board.w-2, board.h-1), knightMoves, True)
+        princess = Piece("checker", board, (board.w-6, board.h-1), checkerMoves, True)
+        princess = Piece("checker", board, (board.w-3, board.h-1), checkerMoves, True)
+        queen = Piece("queen", board, (board.w-5,board.h-1), bishopMoves+rookMoves, True)
+        king = Piece("king", board, (board.w-4,board.h-1), kingMoves, True)
 
 class Signal:
     def __init__(self):
@@ -102,7 +103,6 @@ class Signal:
     def emit(self, *args, **kwargs):
         for subscriber in self._subscribers:
             subscriber(*args, **kwargs)
-
 
 class Piece: #Holds all the piece logic
     def __init__(self, pieceType, board, position, basicMoves, color): # Format [x displacement, y displacement, distance, ID] eg. Rook [[0,1,1,1],[1,0,1,1],[0,-1,1,1],[-1,0,1,1]]; Color is a bool
@@ -214,8 +214,6 @@ class Piece: #Holds all the piece logic
         
         if self.pieceType == "pawn" and self.color == True and self.cell.y == 0:
             self.transition()           
-
-
 
 class Cell: #Class to hold basic info about the board (color, piece id, pos). Each cell is just a square on the board
     signal = Signal()
@@ -330,4 +328,3 @@ class Display:  # Displays the game
 
     def quit(self):
         py.quit()
-        
