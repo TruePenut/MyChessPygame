@@ -159,7 +159,7 @@ class Piece: #Holds all the piece logic
                             print("Too far")
                             
                     elif move[3] == 5: #ID 5: Castling [x, y, distance, ID, [[Rel x, Rel y of the pieces], [New rel x and rel y]]]
-                        if self.board.get_cell(self.cell.x + move[4][0][0], self.cell.y + move[4][0][1]).piece.moveCounter != None: #If I and the piece I am moving are on the first move
+                        if self.board.get_cell(self.cell.x + move[4][0][0], self.cell.y + move[4][0][1]).piece != None: #If I and the piece I am moving are on the first move
                             if self.moveCounter == 0 and self.board.get_cell(self.cell.x + move[4][0][0], self.cell.y + move[4][0][1]).piece.moveCounter == 0: #If I and the piece I am moving are on the first move
                                 if theCellIAmMovingTo.piece == None and self.board.get_cell(self.cell.x + move[4][1][0], self.cell.y + move[4][1][1]).piece == None:
                                     self.listOfMoves.append([move[0]*(x+1), move[1]*bOw*(x+1), 0])
