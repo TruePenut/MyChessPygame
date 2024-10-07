@@ -290,7 +290,7 @@ class Display:  # Displays the game
         self.screen_width = board.w * square_size
         self.screen_height = board.h * square_size
         py.init()
-        self.screen = py.display.set_mode((self.screen_width + 40, self.screen_height + 40))  # Add extra space for labels
+        self.screen = py.display.set_mode((self.screen_width + self.square_size/2, self.screen_height + self.square_size/2))  # Add extra space for labels
         self.font = py.font.SysFont('Arial', 20)  # Set the font and size for labels
 
     def draw_board(self):
@@ -311,14 +311,14 @@ class Display:  # Displays the game
             letter = chr(65 + x)  # Convert 0 -> 'A', 1 -> 'B', etc.
             label = self.font.render(letter, True, (255, 255, 255))  # White text for labels
             # Position the label centered below the respective column
-            self.screen.blit(label, (x * self.square_size + self.square_size // 2 - 10, self.board.h * self.square_size + 5))
+            self.screen.blit(label, (x * self.square_size + self.square_size // 2 - 10, self.board.h * self.square_size))
 
         # Draw the numbers (1-8 or more) along the left side
         for y in range(self.board.h):
             number = str(self.board.h - y)  # Reverse order, top = 8, bottom = 1 for standard boards
             label = self.font.render(number, True, (255, 255, 255))  # White text for labels
             # Position the label centered on the left of the respective row
-            self.screen.blit(label, (x * self.square_size + 60 + self.square_size // 2 - 10, y * self.square_size + self.square_size // 2 - 10))
+            self.screen.blit(label, (x * self.square_size + self.square_size // 2 - 10 + self.square_size*0.9, y * self.square_size + self.square_size // 2 - 10))
 
     def run(self, board):
         self.screen.fill((0, 0, 0))  # Fill the screen with a black background
