@@ -117,6 +117,11 @@ class Piece: #Holds all the piece logic
         #Variables that shift over time
         self.lastPosition = None
         self.listOfMoves = []
+
+        if self.color == True:
+            board.whiteTeam.append(self)
+        else:
+            board.blackTeam.append(self)
         
         #Sprites
         self.sprite_name = f"{'white' if self.color else 'black'}{self.pieceType}.png"
@@ -258,6 +263,9 @@ class Table: #Class of the data part of the game, hold all the positions
         self.h = height
         self.w = width
 
+        self.blackTeam = []
+        self.whiteTeam = []
+
         self.table = []
 
         for y in range(height):
@@ -274,7 +282,10 @@ class Table: #Class of the data part of the game, hold all the positions
         print(self.table[y][x].piece)
         
     def get_cell(self, x, y): # Get the cell at a specified position
-        return self.table[y][x]
+        if x <= self.w and  y <= self.h:
+            return self.table[y][x]
+        else:
+            return None
     
     def resetBoard(self):
         for row in self.table:

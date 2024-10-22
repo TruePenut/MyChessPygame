@@ -13,7 +13,7 @@ else:
     height, width = map(int, inputSize.split("/"))
     board = Table(height, width)
 
-screen = Display(board, 64, cWhite, cGreen)   
+screen = Display(board, 32, cWhite, cGreen)   
 board.print()
 
 lastCell = None
@@ -31,11 +31,14 @@ debugDictionairy = {
     "bishop" : bishopMoves,
     "queen" : rookMoves + bishopMoves,
     "checker" : checkerMoves,
-    "pawn" : pawnMoves,
+    "pawn" : pawn2Moves,
     "blank" : "I have a skill issue"
 }
 
 quickGen("d", board)
+
+print(board.blackTeam)
+print(board.whiteTeam)
 
 turn = True
 running = True
