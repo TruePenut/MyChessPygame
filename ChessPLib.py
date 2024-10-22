@@ -3,10 +3,11 @@ import pygame as py
 # TEST
 
 # Color Palletes:
-cGreen = "#005c32"
-cWhite = "#f7eaad"
-cRed = "#bf6790"
-cBlue = "#567696"
+cGreen = (0, 92, 50)
+cWhite = (247, 234, 173)
+cRed = (191, 103, 144)
+cBlue = (86, 118, 150)
+cOrange = (255, 230, 105)
 
 # Move IDS
 # 0: Can't Capture, only move
@@ -92,6 +93,9 @@ def quickGen(name, board):#Premade boards with set moves and pieces
         princess = Piece("checker", board, (board.w-3, board.h-1), checkerMoves, True)
         queen = Piece("queen", board, (board.w-5,board.h-1), bishopMoves+rookMoves, True)
         king = Piece("king", board, (board.w-4,board.h-1), kingMoves, True)
+
+def averageColor(color1, color2,l = 0.750):
+    return (color1[0]*l + color2[0]*(1-l), color1[1]*l + color2[1]*(1-l), color1[2]*l + color2[2]*(1-l))
 
 class Signal:
     def __init__(self):
@@ -183,30 +187,32 @@ class Piece: #Holds all the piece logic
     def colorInMoves(self):
         for move in self.listOfMoves:
             
-            if self.board.get_cell(self.cell.x + move[0], self.cell.y + move[1]).piece == None and (move[2] == 0 or move[2] == 1 or move[2] == 3 or move[2] == 5):
+            currentCell = self.board.get_cell(self.cell.x + move[0], self.cell.y + move[1])
+            
+            if currentCell.piece == None and (move[2] == 0 or move[2] == 1 or move[2] == 3 or move[2] == 5):
                 print(f"{move} No Kill Move")
-                self.board.get_cell(self.cell.x + move[0], self.cell.y + move[1]).color = cBlue
-                self.board.get_cell(self.cell.x + move[0], self.cell.y + move[1]).validMove = True
+                currentCell.color = cBlue
+                currentCell.validMove = True
             
             elif move[2] == 4:
                 print(f"{move} Jump")
-                if self.board.get_cell(self.cell.x + move[0], self.cell.y + move[1]).piece == None:
-                    self.board.get_cell(self.cell.x + move[0], self.cell.y + move[1]).color = cBlue
-                    self.board.get_cell(self.cell.x + move[0], self.cell.y + move[1]).validMove = True
+                if currentCell.piece == None:
+                    currentCell.color = cBlue
+                    currentCell.validMove = True
                     if self.board.get_cell(self.cell.x + move[3], self.cell.y + move[4]).piece.color != self.color:
-                        self.board.get_cell(self.cell.x + move[3], self.cell.y + move[4]).color = cRed
+                        self.board.get_cell(self.cell.x + move[3], self.cell.y + move[4]).color = cBlue
                 
-            elif self.board.get_cell(self.cell.x + move[0], self.cell.y + move[1]).piece == None and move[2] == 2:
+            elif currentCell.piece == None and move[2] == 2:
                 print(f"{move} Nothing to capture No move")
-                self.board.get_cell(self.cell.x + move[0], self.cell.y + move[1]).color = self.board.get_cell(self.cell.x + move[0], self.cell.y + move[1]).primaryColor
+                currentCell.color = currentCell.primaryColor
                 
-            elif self.board.get_cell(self.cell.x + move[0], self.cell.y + move[1]).piece.color != self.color and move[2] != 0:
+            elif currentCell.piece.color != self.color and move[2] != 0:
                 print(f"{move} Kill Move")
-                self.board.get_cell(self.cell.x + move[0], self.cell.y + move[1]).color = cRed
-                self.board.get_cell(self.cell.x + move[0], self.cell.y + move[1]).validMove = True    
+                currentCell.color = cRed
+                currentCell.validMove = True 
             else:
                 print(f"{move} No Kill No move")
-                self.board.get_cell(self.cell.x + move[0], self.cell.y + move[1]).color = self.board.get_cell(self.cell.x + move[0], self.cell.y + move[1]).primaryColor
+                currentCell.color = currentCell.primaryColor
     
     def move(self, newCell):
         self.lastPosition = [self.cell.x, self.cell.y]
@@ -262,6 +268,9 @@ class Table: #Class of the data part of the game, hold all the positions
     def __init__(self, height, width):
         self.h = height
         self.w = width
+        
+        self.lastMoveCell1 = None
+        self.lastMoveCell2 = None
 
         self.blackTeam = []
         self.whiteTeam = []
@@ -274,6 +283,13 @@ class Table: #Class of the data part of the game, hold all the positions
                 widthList.append(Cell(x, y, None))
             self.table.append(widthList)
             
+    def updateCellColor(self):
+        if self.lastMoveCell1 != None and self.lastMoveCell2 != None:
+            if self.lastMoveCell2.color != cRed:
+                self.lastMoveCell2.color = cOrange
+            if self.lastMoveCell1.color != cRed:
+                self.lastMoveCell1.color = cOrange
+
     def print(self):
         for row in self.table:
             print([f"({cell.x},{cell.y})" for cell in row])
@@ -309,7 +325,7 @@ class Display:  # Displays the game
             for x, cell in enumerate(row):
                 # Adjust the rect position to account for the label space (40 pixels)
                 rect = py.Rect(x * self.square_size , y * self.square_size, self.square_size, self.square_size)
-                py.draw.rect(self.screen, self.board.get_cell(x, y).color, rect)
+                py.draw.rect(self.screen, averageColor(self.board.get_cell(x, y).color, self.board.get_cell(x, y).primaryColor), rect)
                 
                 if cell.piece is not None:
                     piece = cell.piece

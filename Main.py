@@ -13,7 +13,7 @@ else:
     height, width = map(int, inputSize.split("/"))
     board = Table(height, width)
 
-screen = Display(board, 32, cWhite, cGreen)   
+screen = Display(board, 64, cWhite, cGreen)   
 board.print()
 
 lastCell = None
@@ -35,7 +35,7 @@ debugDictionairy = {
     "blank" : "I have a skill issue"
 }
 
-quickGen("d", board)
+quickGen("s", board)
 
 print(board.blackTeam)
 print(board.whiteTeam)
@@ -73,6 +73,10 @@ while running:
                 # Moves the piece
                 currentCell.piece = lastCell.piece
                 lastCell.piece = None
+
+                board.lastMoveCell1 = currentCell
+                board.lastMoveCell2 = lastCell
+                
                 print("I moved!")
                 
                 if currentCell.NBT != None: #NBT Data Actions
@@ -96,6 +100,7 @@ while running:
                 board.resetBoard()
             else:
                 board.resetBoard()
+                
             if currentCell.piece != None and currentCell.piece.color == turn:
                 board.resetBoard()
                 currentCell.piece.genMoves()
@@ -114,7 +119,12 @@ while running:
             bnw += 1
             if debugRotation == 11:
                 debugRotation = 0
+        
+    board.updateCellColor()
+    if lastCell != None: 
+        lastCell.color = cOrange
     
+
     clickedThisFrame = False
     screen.run(board)
     
