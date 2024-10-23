@@ -35,10 +35,7 @@ debugDictionairy = {
     "blank" : "I have a skill issue"
 }
 
-quickGen("s", board)
-
-print(board.blackTeam)
-print(board.whiteTeam)
+quickGen("d", board)
 
 turn = True
 running = True
@@ -54,13 +51,16 @@ while running:
 
     currentCell = board.get_cell(mouseCellx, mouseCelly)
     
+    dangerousCells = [] #Cells that are dangerous
+    board.genDangerousCells(dangerousCells)
+
     for event in py.event.get():
         if event.type == py.QUIT:
             running = False
         
         if event.type == py.MOUSEBUTTONDOWN and event.button == 1: #Left Click
             if currentCell.validMove == True: #Uses the painted tiles as the valid moves, each cell has an attribute called "Valid Move"
-                lastCell.piece.move(currentCell)
+                if lastCell.piece != None: lastCell.piece.move(currentCell)
                 print(genChessNotation(lastCell.piece.pieceType, currentCell, False if currentCell.piece == None else True, board))
 
                 # Notation Generation
@@ -70,7 +70,11 @@ while running:
                     notation.append(genChessNotation(lastCell.piece.pieceType, currentCell, False if currentCell.piece == None else True, board))
                 print(notation)
 
-                # Moves the piece
+                # Moves and deletes the piece
+                if currentCell.piece != None:
+                    board.livingPieces.remove(currentCell.piece)
+                    if currentCell.piece.important: #Checks if the piece is important
+                        running = False
                 currentCell.piece = lastCell.piece
                 lastCell.piece = None
 
@@ -103,7 +107,7 @@ while running:
                 
             if currentCell.piece != None and currentCell.piece.color == turn:
                 board.resetBoard()
-                currentCell.piece.genMoves()
+                currentCell.piece.genMoves(dangerousCells)
                 currentCell.piece.colorInMoves()
                 lastCell = currentCell
                 
@@ -119,12 +123,18 @@ while running:
             bnw += 1
             if debugRotation == 11:
                 debugRotation = 0
-        
+
+    dangerousCells = [] #Cells that are dangerous
+    board.genDangerousCells(dangerousCells)
+    for piece in board.livingPieces:
+        for move in dangerousCells:
+            if move.piece != None and move.piece.important and move.piece.color != piece.color:
+                move.color = cRed
+
     board.updateCellColor()
     if lastCell != None: 
         lastCell.color = cOrange
     
-
     clickedThisFrame = False
     screen.run(board)
     
